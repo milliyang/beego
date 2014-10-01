@@ -148,7 +148,10 @@ func (manager *Manager) SessionStart(w http.ResponseWriter, r *http.Request) (se
 	cookie, err := r.Cookie(manager.config.CookieName)
 	if err != nil || cookie.Value == "" {
 		sid := manager.sessionId(r)
-		session, _ = manager.provider.SessionRead(sid)
+		session, err = manager.provider.SessionRead(sid)
+		if err != nil {
+			fmt.Println("fxxk, session err", err.Error())
+		}
 		cookie = &http.Cookie{Name: manager.config.CookieName,
 			Value:    url.QueryEscape(sid),
 			Path:     "/",
@@ -165,10 +168,16 @@ func (manager *Manager) SessionStart(w http.ResponseWriter, r *http.Request) (se
 	} else {
 		sid, _ := url.QueryUnescape(cookie.Value)
 		if manager.provider.SessionExist(sid) {
-			session, _ = manager.provider.SessionRead(sid)
+			session, err = manager.provider.SessionRead(sid)
+			if err != nil {
+				fmt.Println("fxxk, session err2", err.Error())
+			}
 		} else {
 			sid = manager.sessionId(r)
-			session, _ = manager.provider.SessionRead(sid)
+			session, err = manager.provider.SessionRead(sid)
+			if err != nil {
+				fmt.Println("fxxk, session err3", err.Error())
+			}
 			cookie = &http.Cookie{Name: manager.config.CookieName,
 				Value:    url.QueryEscape(sid),
 				Path:     "/",

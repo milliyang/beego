@@ -603,6 +603,9 @@ func (p *ControllerRegistor) ServeHTTP(rw http.ResponseWriter, r *http.Request) 
 	// session init
 	if SessionOn {
 		context.Input.CruSession = GlobalSessions.SessionStart(w, r)
+		if context.Input.CruSession == nil {
+			fmt.Println("shit null context.Input.CruSession")
+		}
 		defer func() {
 			context.Input.CruSession.SessionRelease(w)
 		}()
@@ -772,19 +775,19 @@ Admin:
 		}
 	}
 
-	if RunMode == "dev" {
-		var devinfo string
-		if findrouter {
-			if routerInfo != nil {
-				devinfo = fmt.Sprintf("| % -10s | % -40s | % -16s | % -10s | % -40s |", r.Method, r.URL.Path, timeend.String(), "match", routerInfo.pattern)
-			} else {
-				devinfo = fmt.Sprintf("| % -10s | % -40s | % -16s | % -10s |", r.Method, r.URL.Path, timeend.String(), "match")
-			}
-		} else {
-			devinfo = fmt.Sprintf("| % -10s | % -40s | % -16s | % -10s |", r.Method, r.URL.Path, timeend.String(), "notmatch")
-		}
-		Debug(devinfo)
-	}
+	// if RunMode == "dev" {
+	// 	var devinfo string
+	// 	if findrouter {
+	// 		if routerInfo != nil {
+	// 			devinfo = fmt.Sprintf("| % -10s | % -40s | % -16s | % -10s | % -40s |", r.Method, r.URL.Path, timeend.String(), "match", routerInfo.pattern)
+	// 		} else {
+	// 			devinfo = fmt.Sprintf("| % -10s | % -40s | % -16s | % -10s |", r.Method, r.URL.Path, timeend.String(), "match")
+	// 		}
+	// 	} else {
+	// 		devinfo = fmt.Sprintf("| % -10s | % -40s | % -16s | % -10s |", r.Method, r.URL.Path, timeend.String(), "notmatch")
+	// 	}
+	// 	Debug(devinfo)
+	// }
 
 	// Call WriteHeader if status code has been set changed
 	if context.Output.Status != 0 {

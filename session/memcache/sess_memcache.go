@@ -37,8 +37,8 @@ import (
 	"strings"
 	"sync"
 
+	"fmt"
 	"github.com/astaxie/beego/session"
-
 	"github.com/bradfitz/gomemcache/memcache"
 )
 
@@ -63,6 +63,7 @@ func (rs *MemcacheSessionStore) Set(key, value interface{}) error {
 
 // get value in memcache session
 func (rs *MemcacheSessionStore) Get(key interface{}) interface{} {
+	fmt.Println("MemcacheSessionStore get", key)
 	rs.lock.RLock()
 	defer rs.lock.RUnlock()
 	if v, ok := rs.values[key]; ok {
@@ -130,7 +131,12 @@ func (rp *MemProvider) SessionRead(sid string) (session.SessionStore, error) {
 	}
 	item, err := client.Get(sid)
 	if err != nil {
-		return nil, err
+		if err != memcache.ErrCacheMiss {
+			return nil, err
+		}
+		fmt.Println("memcache cache miss, but keepgooing")
+		// keep going
+		item = &memcache.Item{}
 	}
 	var kv map[interface{}]interface{}
 	if len(item.Value) == 0 {
@@ -138,10 +144,10 @@ func (rp *MemProvider) SessionRead(sid string) (session.SessionStore, error) {
 	} else {
 		kv, err = session.DecodeGob(item.Value)
 		if err != nil {
-			return nil, err
+			fmt.Println("memcache DecodeGob" + err.Error() + " but keepgoing")
+			// return nil, err
 		}
 	}
-
 	rs := &MemcacheSessionStore{sid: sid, values: kv, maxlifetime: rp.maxlifetime}
 	return rs, nil
 }

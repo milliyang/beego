@@ -17,6 +17,7 @@ package beego
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"html/template"
 	"io"
 	"io/ioutil"
@@ -433,7 +434,10 @@ func (c *Controller) SetSession(name interface{}, value interface{}) {
 	if c.CruSession == nil {
 		c.StartSession()
 	}
-	c.CruSession.Set(name, value)
+	err := c.CruSession.Set(name, value)
+	if err != nil {
+		fmt.Println("What if SetSession fail? !!!", err.Error())
+	}
 }
 
 // GetSession gets value from session.
